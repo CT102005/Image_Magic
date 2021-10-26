@@ -59,11 +59,11 @@ class Bus(Vehicle):
         """
         if age >= 18:
             if age <= 60:
-                print("The fare is $5")
+                print("The fare of the bus ride is $5")
         elif age >= 17:
-            print("The fare is free.")
+            print("The fare of the bus ride is free.")
         else:
-            print("The fare is free.")
+            print("The fare of the bus ride is free.")
 
 some_bus = Bus("bus", 60, 20)
 some_bus.fare(10)

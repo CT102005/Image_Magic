@@ -39,14 +39,15 @@ class Vehicle:
             capacity: int
                 the capacity of the vehicle
             """
-        self.name = "Car"
-        self.max_speed = 50
-        self.capacity = 5
+        self.name = name
+        self.max_speed = max_speed
+        self.capacity = capacity
 
     def vroom(self) -> None:
         """Returns the number of vrooms the vehicle creates"""
         for i in range(self.max_speed):
             print("vroom")
+        # Or print("Vroom " * self.max_speed)
 
 class Bus(Vehicle):
     """Represents a bus which IS A VEHICLE"""
@@ -57,17 +58,27 @@ class Bus(Vehicle):
         Returns:
               The fare for the person entering the bus, based on their age
         """
-        if age >= 18:
-            if age <= 60:
-                print("The fare of the bus ride is $5")
-        elif age >= 17:
-            print("The fare of the bus ride is free.")
+        if age >= 18 and age <= 60:
+                print("The fare of the bus ride is $5 🚌💲")
+        elif age >= 17 and age <= 0:
+            print("The fare of the bus ride is free. 🚌")
+        elif age < -1:
+            print("That's not a possible age, no bus for you. 👎")
         else:
-            print("The fare of the bus ride is free.")
+            print("The fare of the bus is free. 🚌")
 
-some_bus = Bus("bus", 60, 20)
-some_bus.fare(10)
-
-some_vehicle = Vehicle("car", 50, 10)
+some_vehicle = Vehicle("Van", 50, 10)
 some_vehicle.vroom()
+print(some_vehicle.name)
+print(some_vehicle.max_speed)
+print(some_vehicle.capacity)
 
+print("---------------------------------------------")
+print("Bus")
+print("")
+some_bus = Bus("Yellow Bus", 60, 20)
+some_bus.fare(19)
+# some_bus.vroom()
+print(some_bus.name)
+print(some_bus.max_speed)
+print(some_bus.capacity)

@@ -73,7 +73,7 @@ def brighter(pixel: tuple) -> tuple:
         blue = 255
     return red, green, blue
 
-def brighter_user_control(pixel: tuple, magnitude: int) -> tuple:
+def brightness(pixel: tuple, magnitude: int) -> tuple:
     """Increases the brightness of a pixel
 
     Args:
@@ -85,18 +85,27 @@ def brighter_user_control(pixel: tuple, magnitude: int) -> tuple:
     """
     red, green, blue = pixel
     MAX = 255
+    MIN = 0
     if red + magnitude > MAX:
-        red = int(red) + magnitude
-    else:
         red = MAX
+    elif red + magnitude < MIN:
+        red = MIN
+    else:
+        red = int(red) + magnitude
+
     if green + magnitude > MAX:
-        green = int(green) + magnitude
-    else:
         green = MAX
-    if blue + magnitude > MAX:
-        blue = int(blue) + magnitude
+    elif green + magnitude < MIN:
+        green = MIN
     else:
+        green = int(green) + magnitude
+
+    if blue + magnitude > MAX:
         blue = MAX
+    elif blue + magnitude < MIN:
+        blue = MIN
+    else:
+        blue = int(blue) + magnitude
     return red, green, blue
 
 # Load the image (pumpkin)
@@ -128,7 +137,7 @@ for y in range(image_height):
         # Grab information for THIS pixel
         pixel = image.getpixel((x, y))
         # TODO: add function call to to_greyscale
-        brighter_pixel = brighter_user_control(pixel, 50)
+        brighter_pixel = brightness(pixel, -100)
         # put that in the new image
         output_image.putpixel((x, y), brighter_pixel)
-output_image.save('brighterer.jpg')
+output_image.save('brightness_lower2.jpg')

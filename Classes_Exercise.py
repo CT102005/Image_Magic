@@ -74,8 +74,7 @@ print(some_vehicle.max_speed)
 print(some_vehicle.capacity)
 
 print("---------------------------------------------")
-print("Bus")
-print("")
+
 some_bus = Bus("Yellow Bus", 60, 20)
 some_bus.fare(19)
 # some_bus.vroom()

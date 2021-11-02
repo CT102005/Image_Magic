@@ -8,6 +8,7 @@ REACH THE SAFEHOUSE BEFORE THE MAN GON GETCHU.
 
 CHOICES = """
     --- Your Choices ---
+    A. Eat a tofu
     B. Drive moderately
     C. Speed ahead at full speed!
     D. Stop to refuel.
@@ -18,3 +19,9 @@ CHOICES = """
 
 REFUEL = "-------You filled the fuel tank.------- The agents have gotten closer"
 
+EAT_TOFU = """"--------Mmmmm soybean goodness.
+--------You hunger is sated
+"""
+
+NO_TOFU = """--------You have no tofu left. 😢
+"""

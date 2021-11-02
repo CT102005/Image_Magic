@@ -35,7 +35,7 @@ class Game:
     def typewriter_effect(self, text:str) -> None:
         """Print out to console with a typewriter effect"""
         for char in textwrap.dedent(text):
-            time.sleep(0.04)
+            time.sleep(0.01)
             sys.stdout.write(char)
             sys.stdout.flush()
 
@@ -50,6 +50,29 @@ class Game:
         # Get the user's response
         user_choice = input().strip(",.?!").lower()
         # Based on their choice, change the attributes of the class
+        agents_distance_now = random.randrange(7, 15)
+        if user_choice == "b":
+            player_distance_now = random.randrange(3, 8)
+            self.distance_travelled += player_distance_now
+            # Move the agents
+            self.agents_distance += agents_distance_now - player_distance_now
+            # Burn fuel
+            self.fuel -= random.randrange(2, 7)
+            # Give the player some feedback
+            print(f"\n--------You drive conservatively.")
+            print(f"---------You travelled {player_distance_now} km")
+        if user_choice == "c":
+            # Move the player
+            player_distance_now = random.randrange(10, 16)
+            self.distance_travelled += player_distance_now
+            # Move the agents
+            self.agents_distance += agents_distance_now - player_distance_now
+            # Burn fuel
+            self.fuel -= random.randrange(5, 11)
+            # Give the player some feedback
+            print(f"\n--------ZOOOOOOOOOOOOOOOM.")
+            print(f"---------You travelled {player_distance_now} km")
+
         if user_choice == "d":
             self.fuel = MAX_FUEL
 

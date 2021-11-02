@@ -8,6 +8,8 @@ REACH THE SAFEHOUSE BEFORE THE MAN GON GETCHU.
 
 CHOICES = """
     --- Your Choices ---
+    B. Drive moderately
+    C. Speed ahead at full speed!
     D. Stop to refuel.
     E. Current status.
     Q. Quit the game.
@@ -15,3 +17,4 @@ CHOICES = """
 """
 
 REFUEL = "-------You filled the fuel tank.------- The agents have gotten closer"
+

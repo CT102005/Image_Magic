@@ -12,11 +12,14 @@ import midnight_rider_text
 MAX_FUEL = 50
 MAX_TOFU = 3
 MAX_HUNGER = 50
+MAX_DISTANCE = 100
 ENDGAME_REASONS = {
     "LOSE_AGENTS": 1,
     "LOSE_FUEL": 2,
-    "LOSE_HUNGER": 3
+    "LOSE_HUNGER": 3,
+    "WIN": 4
 }
+
 
 class Game:
     """Represent our game engine
@@ -41,7 +44,6 @@ class Game:
         self.fuel = MAX_FUEL
         self.hunger = 0
         self.endgame_reason = -1
-
 
     def introduction(self) -> None:
         """Print the introduction text"""
@@ -132,7 +134,7 @@ class Game:
             # Allows us to quit the while loop
             self.done = True
             # Helps with printing the right ending
-            self.endgame_reason = ENDGAME_REASONS["LOSE_AGENTS"]# TODO
+            self.endgame_reason = ENDGAME_REASONS["LOSE_AGENTS"]  # TODO
         # TODO: LOSE - Fuel runs out
         if self.fuel <= 0:
             self.done = True
@@ -145,6 +147,10 @@ class Game:
 
             self.endgame_reason = ENDGAME_REASONS["LOSE_HUNGER"]
         # TODO: WIN - reach the goal
+        if self.distance_travelled >= MAX_DISTANCE:
+            self.done = True
+
+            self.endgame_reason = ENDGAME_REASONS["WIN"]
 
 
 def main() -> None:

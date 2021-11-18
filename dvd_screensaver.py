@@ -93,14 +93,12 @@ def main() -> None:
 
         # ---------- CHANGE ENVIRONMENT
         dvd_image.update()
-        print(f"x: {dvd_image.x}, y: {dvd_image.y}")
         # ---------- DRAW THE ENVIRONMENT
         screen.fill(LIGHT_BLUE)
         screen.blit(dvd_image.bg, (0, 0))
-        screen.blit(dvd_image.bg, (0, SCREEN_HEIGHT / 2))
-        screen.blit(dvd_image.bg, (SCREEN_WIDTH / 2, 0))
-        screen.blit(dvd_image.bg, (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
-
+        # screen.blit(dvd_image.bg, (0, SCREEN_HEIGHT / 2))
+        # screen.blit(dvd_image.bg, (SCREEN_WIDTH / 2, 0))
+        # screen.blit(dvd_image.bg, (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
         # Fill with background colour
         # .blit9(<surface/image>, coords)
         screen.blit(dvd_image.img, (dvd_image.x, dvd_image.y))

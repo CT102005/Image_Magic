@@ -7,7 +7,7 @@ BLACK = (  0,   0,   0)
 RED   = (255,   0,   0)
 GREEN = (  0, 255,   0)
 BLUE  = (  0,   0, 255)
-BGCOLOUR = (100, 100, 255)
+BGCOLOUR = (200, 200, 255)
 RAD_RED = (255, 56, 100)
 BLK_CHOCOLATE = (25, 17, 2)
 NAVY_BLUE = (3, 4, 94)
@@ -68,9 +68,15 @@ def main() -> None:
                 done = True
 
         # ----------- CHANGE ENVIRONMENT
+        # Process player movement based on mouse pos
+        mouse_pos = pygame.mouse.get_pos()
+        player.rect.x = mouse_pos[0] - player.rect.width / 2
+        player.rect.y = mouse_pos[1] - player.rect.height / 2
+        # mouse_pos = player.rect.x) + 3, player.rect.y
 
         # ----------- DRAW THE ENVIRONMENT
         screen.fill(BGCOLOUR)      # fill with bgcolor
+
 
         # Draw all sprites
         all_sprites.draw(screen)

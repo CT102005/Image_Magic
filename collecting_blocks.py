@@ -33,7 +33,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         # Create the image of the block
         self.image = pygame.image.load("./images/NPC_Timmie.png")
-        self.image = pygame.transform.scale(self.image, (50, 134))
+        self.image = pygame.transform.scale(self.image, (40, 90))
         # Based on the image, create a rectangle for the block
         self.rect = self.image.get_rect()
 
@@ -56,7 +56,7 @@ class Block(pygame.sprite.Sprite):
         super().__init__()
         # Create the image of the block
         self.image = pygame.image.load("./images/Pigeon.png")
-        self.image = pygame.transform.scale(self.image, (30, 31))
+        self.image = pygame.transform.scale(self.image, (40, 42))
 
         # Based on the image, create a Rect for the block
         self.rect = self.image.get_rect()
@@ -87,6 +87,27 @@ class Enemy(pygame.sprite.Sprite):
         # Define the initial velocity
         self.x_vel = random.choice([-4, -3, 3, 4])
         self.y_vel = random.choice([-4, -3, 3, 4])
+
+    def update(self) -> None:
+        """Calculates movement"""
+        # Update the x-coordinate
+        self.rect.x += self.x_vel
+        self.rect.y += self.y_vel
+        # Constrain movement
+        # X -
+        if self.rect.left < 0:
+            self.rect.left = 0
+            self.x_vel = -self.x_vel # Bounce
+        if self.rect.right > SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
+            self.x_vel = -self.x_vel
+        # Y -
+        if self.rect.top < 0:
+            self.rect.y = 0
+            self.y_vel = -self.y_vel # Bounce
+        if self.rect.bottom > SCREEN_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT
+            self.y_vel = -self.y_vel
 
 
 
@@ -139,7 +160,6 @@ def main() -> None:
 
 
 
-
     # ----------- MAIN LOOP
     while not done:
         # ----------- EVENT LISTENER
@@ -152,6 +172,9 @@ def main() -> None:
         mouse_pos = pygame.mouse.get_pos()
         player.rect.x = mouse_pos[0] - player.rect.width / 2
         player.rect.y = mouse_pos[1] - player.rect.height / 2
+
+        all_sprites.update()
+
 
         # Check all collisions between the player and all blocks
         blocks_collided = pygame.sprite.spritecollide(player, block_sprites, True)

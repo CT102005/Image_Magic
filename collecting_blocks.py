@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 pygame.init()
 
 WHITE = (255, 255, 255)
@@ -33,9 +34,10 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         # Create the image of the block
         self.image = pygame.image.load("./images/NPC_Timmie.png")
-        self.image = pygame.transform.scale(self.image, (40, 90))
+        self.image = pygame.transform.scale(self.image, (36, 81))
         # Based on the image, create a rectangle for the block
         self.rect = self.image.get_rect()
+        self.lasttimecollided = 0
 
 class Block(pygame.sprite.Sprite):
     """Describes a block object
@@ -77,7 +79,7 @@ class Enemy(pygame.sprite.Sprite):
         """
         super().__init__()
         self.image = pygame.image.load("./images/tornado.png")
-        self.image = pygame.transform.scale(self.image, (60, 72))
+        self.image = pygame.transform.scale(self.image, (50, 62))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = (
             random.randrange(SCREEN_WIDTH),
@@ -85,8 +87,8 @@ class Enemy(pygame.sprite.Sprite):
         )
 
         # Define the initial velocity
-        self.x_vel = random.choice([-4, -3, 3, 4])
-        self.y_vel = random.choice([-4, -3, 3, 4])
+        self.x_vel = random.choice([-3, -2, 2, 3])
+        self.y_vel = random.choice([-3, -2, 2, 3])
 
     def update(self) -> None:
         """Calculates movement"""
@@ -114,6 +116,7 @@ class Enemy(pygame.sprite.Sprite):
 def main() -> None:
     """Driver of the Python script"""
     # Create the screen
+    global enemy
     screen = pygame.display.set_mode(SCREEN_SIZE)
     pygame.display.set_caption(WINDOW_TITLE)
 
@@ -122,6 +125,11 @@ def main() -> None:
     clock = pygame.time.Clock()
     num_blocks = 100
     num_enemies = 10
+    time_start = time.time()
+    time_invincible = 5
+
+    font = pygame.font.SysFont("Arial", 25)
+
 
     score = 0
 
@@ -163,6 +171,8 @@ def main() -> None:
     # ----------- MAIN LOOP
     while not done:
         # ----------- EVENT LISTENER
+        # if len(pygame.sprite.spritecollide(player, enemy_sprites, False)) > 1:
+          #  done = True
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
@@ -175,22 +185,54 @@ def main() -> None:
 
         all_sprites.update()
 
-
         # Check all collisions between the player and all blocks
         blocks_collided = pygame.sprite.spritecollide(player, block_sprites, True)
+
+        # Check all collisions between the player and all enemies
+        enemies_collided = pygame.sprite.spritecollide(player, enemy_sprites, False)
+
+        # Set a time for invincibility at the beginning of the
+        if time.time() - time_start > time_invincible:
+            for enemy in enemies_collided:
+                if len(enemies_collided) > 1:
+                    done = True
+                    print("GAME OVER!!")
+
 
         for block in blocks_collided:
             score += 1
             print(f"Score: {score}")
         # mouse_pos = player.rect.x) + 3, player.rect.y
 
+        enemies_collided = pygame.sprite.spritecollide(player, enemy_sprites, False)
+
+        for enemy in enemies_collided:
+        # Add in lasttimecollided
+            print(f"Enemy Collided!")
+
+
+        # mouse_pos = player.rect.x) + 3, player.rect.y
+
         # ----------- DRAW THE ENVIRONMENT
         screen.fill(BGCOLOUR)      # fill with bgcolor
+
+        # Draw the score on the screen
+
 
 
         # Draw all sprites
         all_sprites.draw(screen)
 
+        # Draw the score on the screen
+        screen.blit(
+            font.render(f"Score: {score}", True, BLACK),
+            (5, 5)
+        )
+
+        screen.blit(
+            font.render(f"Lives left: {10 - score}", True, BLACK),
+            (5, 5)
+        )
         # Update the screen
         pygame.display.flip()
 

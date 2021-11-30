@@ -28,6 +28,8 @@ class Player(pygame.sprite.Sprite):
             representation of our Block
         rect: numerical representation of
             our Block [x, y, width, height]
+        hp: describe how much
+            health our player has
         """
     def __init__(self) -> None:
         # Call the superclass constructor
@@ -37,7 +39,13 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (36, 81))
         # Based on the image, create a rectangle for the block
         self.rect = self.image.get_rect()
-        self.lasttimecollided = 0
+        # Initial health points
+        self.hp = 250
+
+    def hp_remaining(self) -> float:
+        """Return the percent of health remaining"""
+        return self.hp / 250
+
 
 class Block(pygame.sprite.Sprite):
     """Describes a block object
@@ -186,7 +194,7 @@ def main() -> None:
         all_sprites.update()
 
         # Check all collisions between the player and all blocks
-        blocks_collided = pygame.sprite.spritecollide(player, block_sprites, True)
+
 
         # Check all collisions between the player and all enemies
         enemies_collided = pygame.sprite.spritecollide(player, enemy_sprites, False)
@@ -194,20 +202,24 @@ def main() -> None:
         # Set a time for invincibility at the beginning of the
         if time.time() - time_start > time_invincible:
             for enemy in enemies_collided:
+                player.hp -= 1
+                print(f"{player.hp}")
                 if len(enemies_collided) > 1:
-                    done = True
+                    # done = True
                     print("GAME OVER!!")
 
+            blocks_collided = pygame.sprite.spritecollide(player, block_sprites, True)
+            for block in blocks_collided:
+                score += 1
+                print(f"Score: {score}")
 
-        for block in blocks_collided:
-            score += 1
-            print(f"Score: {score}")
+
         # mouse_pos = player.rect.x) + 3, player.rect.y
 
         enemies_collided = pygame.sprite.spritecollide(player, enemy_sprites, False)
 
         for enemy in enemies_collided:
-        # Add in lasttimecollided
+        # TODO Add in lasttimecollided
             print(f"Enemy Collided!")
 
 
@@ -229,10 +241,19 @@ def main() -> None:
             (5, 5)
         )
 
-        screen.blit(
-            font.render(f"Lives left: {10 - score}", True, BLACK),
-            (5, 5)
-        )
+        #screen.blit(
+            #font.render(f"Lives left: {10 - int()}", True, BLACK),
+           #(600, 5)
+       # )
+
+        # Draw a health bar
+        # Draw the background rectangle
+        pygame.draw.rect(screen, NAVY_BLUE, [580, 5, 215, 20])
+
+        # Draw the foreground rectangle which represents the remaining health
+        life_remaining = 215 - (215 * player.hp_remaining())
+        pygame.draw.rect(screen, GREEN, [580, 5, life_remaining, 20])
+
         # Update the screen
         pygame.display.flip()
 

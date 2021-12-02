@@ -36,7 +36,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         # Create the image of the block
         self.image = pygame.image.load("./images/NPC_Timmie.png")
-        self.image = pygame.transform.scale(self.image, (36, 81))
+        self.image = pygame.transform.scale(self.image, (24, 54))
         # Based on the image, create a rectangle for the block
         self.rect = self.image.get_rect()
         # Initial health points
@@ -95,8 +95,8 @@ class Enemy(pygame.sprite.Sprite):
         )
 
         # Define the initial velocity
-        self.x_vel = random.choice([-3, -2, 2, 3])
-        self.y_vel = random.choice([-3, -2, 2, 3])
+        self.x_vel = random.choice([-4, -3, 3, 4])
+        self.y_vel = random.choice([-4, -3, 3, 4])
 
     def update(self) -> None:
         """Calculates movement"""
@@ -132,7 +132,7 @@ def main() -> None:
     done = False
     clock = pygame.time.Clock()
     num_blocks = 100
-    num_enemies = 10
+    num_enemies = 20
     time_start = time.time()
     time_invincible = 5
 
@@ -199,13 +199,15 @@ def main() -> None:
         # Check all collisions between the player and all enemies
         enemies_collided = pygame.sprite.spritecollide(player, enemy_sprites, False)
 
+
         # Set a time for invincibility at the beginning of the
         if time.time() - time_start > time_invincible:
             for enemy in enemies_collided:
                 player.hp -= 1
                 print(f"{player.hp}")
-                if len(enemies_collided) > 1:
-                    # done = True
+                # if len(enemies_collided) > 1:
+                if int(player.hp) == 0:
+                    done = True
                     print("GAME OVER!!")
 
             blocks_collided = pygame.sprite.spritecollide(player, block_sprites, True)

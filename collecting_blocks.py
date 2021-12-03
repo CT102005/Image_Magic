@@ -134,7 +134,14 @@ def main() -> None:
     num_blocks = 100
     num_enemies = 20
     time_start = time.time()
-    time_invincible = 5
+    time_invincible = 5     # Seconds
+    game_state = "running"
+    endgame_cooldown = 5       # Seconds
+    time_ended = 0.0
+
+    endgame_messages = {
+        "win": "Congratulations, you won!", "lose": "Sorry, they got you. Play again."
+    }
 
     font = pygame.font.SysFont("Arial", 25)
 
@@ -185,6 +192,25 @@ def main() -> None:
             if event.type == pygame.QUIT:
                 done = True
 
+        # End-game Listener
+        # TODO: WIN CONDITION - Collect 100 blocks
+        if score == num_blocks:
+            # Indicate to draw a message
+            game_state = "won"
+
+            # SET THE TIME THAT THE GAME WAS WON
+            if time_ended == 0:
+                time_ended = time.time()
+            # Set parameters to keep the screen alive
+            # Wait 4 seconds to kill the screen
+            if time.time() - time_ended >= endgame_cooldown:
+                done - True
+
+        # TODO: LOSE CONDITION - Player's hp goes below 0
+        if player.hp_remaining() <= 0:
+            done = True
+            print(" GAME OVER")
+
         # ----------- CHANGE ENVIRONMENT
         # Process player movement based on mouse pos
         mouse_pos = pygame.mouse.get_pos()
@@ -206,9 +232,6 @@ def main() -> None:
                 player.hp -= 1
                 print(f"{player.hp}")
                 # if len(enemies_collided) > 1:
-                if int(player.hp) == 0:
-                    done = True
-                    print("GAME OVER!!")
 
             blocks_collided = pygame.sprite.spritecollide(player, block_sprites, True)
             for block in blocks_collided:
@@ -255,6 +278,12 @@ def main() -> None:
         # Draw the foreground rectangle which represents the remaining health
         life_remaining = 215 - (215 * player.hp_remaining())
         pygame.draw.rect(screen, GREEN, [580, 5, life_remaining, 20])
+
+        # If we've won, draw the text on the screen
+        if game_state == "won":
+            screen.blit(
+                font.render(endgame_messages["win"], True, BLACK), (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+
 
         # Update the screen
         pygame.display.flip()

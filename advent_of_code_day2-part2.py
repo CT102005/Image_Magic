@@ -1,6 +1,7 @@
-# Advent of Code 2021 Day 2
+# Advent of Code 2021 Day 2 part 2
 horizontal_position = 0
 vertical_position = 0
+aim = 0
 
 with open("./data/input-day2.txt") as f:
     commands = []
@@ -22,12 +23,12 @@ for command in commands:
     magnitude = int(command[1])
     if command[0] == "forward":
         horizontal_position += int(command[1])
+        # (aim) * (int(command[1])) += vertical_position
+        vertical_position += (aim * int(command[1]))
     if command[0] == "down":
-        vertical_position -= int(command[1])
+        aim += int(command[1])
     if command[0] == "up":
-        vertical_position += int(command[1])
+        aim -= int(command[1])
 print(vertical_position)
 print(horizontal_position)
-
-
-
+print (vertical_position * horizontal_position)

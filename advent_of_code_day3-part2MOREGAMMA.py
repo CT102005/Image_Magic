@@ -161,6 +161,6 @@ if gammarayzerocount8 > gammarayonecount8:
     print ("0")
 
 
-print(4082 * 1362)
+print(4082 * 224)
 
-# if gammaray[1] == "1"
+# if gammaray[1] == "1":

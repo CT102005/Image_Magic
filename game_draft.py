@@ -1,5 +1,5 @@
 import pygame
-
+import random
 pygame.init()
 
 WHITE = (255, 255, 255)
@@ -8,6 +8,7 @@ RED   = (255,   0,   0)
 GREEN = (  0, 255,   0)
 BLUE  = (  0,   0, 255)
 BGCOLOUR = (175, 140, 155)
+SHADOW_BLUE = (110, 130, 160)
 
 SCREEN_WIDTH  = 1600
 SCREEN_HEIGHT = 1200
@@ -42,22 +43,28 @@ class Player(pygame.sprite.Sprite):
         self.y_vel = 0
         self.grav = 0.4
 
+        self.cloud_list = pygame.sprite.Group()
+
+        # TODO: cloud fall cooldown
+
     def rect(self) -> pygame.rect:
         """Returns a pygame.rect the represents a dvd_image"""
         return[self.x, self.y, self.width, self.height]
 
     def left(self):
-        self.x_vel = -5
+        self.x_vel = -7
     def right(self):
-        self.x_vel = 5
+        self.x_vel = 7
     def stop(self):
         self.x_vel = 0
     def up(self):
-        if self.rect.bottom == SCREEN_HEIGHT:
+        # Check if we're on a platform
+        self.rect.bottom += 2
+        cloud_underneath = pygame.sprite.spritecollideany(self, self.cloud_list)
+        self.rect.bottom -= 2
+
+        if self.rect.bottom == SCREEN_HEIGHT or cloud_underneath:
             self.y_vel = -12
-
-    # def gravity(self):
-
 
 
     def update(self) -> None:
@@ -72,7 +79,6 @@ class Player(pygame.sprite.Sprite):
         if self.rect.right > SCREEN_WIDTH:
             self.rect.right = SCREEN_WIDTH
         # Y -
-
         if self.rect.bottom < SCREEN_HEIGHT:
             self.y_vel += self.grav
         else:
@@ -85,25 +91,75 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = SCREEN_HEIGHT
             self.y_vel = -self.y_vel
 
-# class Cloud(pygame.sprite.Sprite):
-#     """Describes a platform
-#
-#     Attributes:
-#         image: Surface that is the visual
-#             representation of our Block
-#         rect: numerical representation of
-#             our Block [x, y, width, height]
-#     """
-#     def __init__(self):
-#         platforms = [
-#             [150, 20, 1100, 600],
-#             [150, 20, 900, 1600],
-#             [150, 20, 600, 1100],
-#             [150, 20, 400, 700],
-#             [150, 20, 1000, 1700],
-#             [150, 20, 800, 500]
-#         ]
+        clouds_collided = pygame.sprite.spritecollide(self, self.cloud_list, False)
 
+        for cloud in clouds_collided:
+            if self.y_vel > 0:
+                self.rect.bottom = cloud.rect.top
+            elif self.y_vel < 0:
+                self.rect.top = cloud.rect.bottom
+
+class Block(pygame.sprite.Sprite):
+    """Describes a block object
+    A subclass of pygame.sprite.Sprite
+
+    Attributes:
+        image: Surface that is the visual
+            representation of our Block
+        rect: numerical representation of
+            our Block [x, y, width, height]
+    """
+    def __init__(self) -> None:
+        """
+        Arguments:
+
+        """
+        # Call the superclass constructor
+        super().__init__()
+        # Create the image of the block
+        self.width = 30
+        self.height = 10
+        self.image = pygame.Surface([self.width, self.height])
+        self.image.fill(SHADOW_BLUE)
+
+        # Based on the image, create a Rect for the block
+        self.rect = self.image.get_rect()
+
+class Cloud(pygame.sprite.Sprite):
+    """Describes a platform
+
+    Attributes:
+        image: Surface that is the visual
+            representation of our Block
+        rect: numerical representation of
+            our Block [x, y, width, height]
+    """
+    platforms = [
+        [150, 20, 1100, 600],
+        [150, 20, 900, 800],
+        [150, 20, 600, 1100],
+        [150, 20, 350, 700],
+        [150, 20, 1000, 100],
+        [150, 20, 800, 500],
+        [150, 20, 100, 300],
+        [150, 20, 300, 200],
+        [150, 20, 150, 1000],
+        [150, 20, 450, 900],
+        [150, 20, 500, 600],
+        [150, 20, 550, 300],
+        [150, 20, 1100, 1000],
+        [150, 20, 1400, 850],
+        # [150, 20, 1, 1],
+
+    ]
+
+    def __init__(self, width, height):
+        """Platform constructor"""
+        super().__init__()
+
+        self.image = pygame.image.load("./images/cloud.png")
+        self.image = pygame.transform.scale(self.image, (150, 20))
+        self.rect = self.image.get_rect()
 
 class Bullet(pygame.sprite.Sprite):
     """Bullet
@@ -126,10 +182,12 @@ class Bullet(pygame.sprite.Sprite):
         # Set the middle of the bullet to be at coords
         self.rect.center = coords
 
-        self.vel_y = 5
+        self.vel_y = 8
+        self.cloud_list = pygame.sprite.Group()
 
     def update(self):
         self.rect.y -= self.vel_y
+
 
 def main() -> None:
     """Driver of the Python script"""
@@ -140,16 +198,49 @@ def main() -> None:
     # Create some local variables that describe the environment
     done = False
     clock = pygame.time.Clock()
-    platforms = []
+    num_blocks = 50
 
     # Create groups to hold sprites
     all_sprites = pygame.sprite.Group()
     bullet_sprites = pygame.sprite.Group()
+    cloud_sprites = pygame.sprite.Group()
+    block_sprites = pygame.sprite.Group()
+
 
     # Create player block
     player = Player()
+
+    # Font
+    font_medium = pygame.font.SysFont("dejavusansmono", 30)
+    font_small = pygame.font.SysFont("dejavusansmono", 25)
+
+    score = 0
+
+    # Create cloud block and add to the cloud sprites and all sprites list
+    for c in Cloud.platforms:
+        cloud = Cloud(c[0], c[1])
+        cloud.rect.x, cloud.rect.y = c[2], c[3]
+        cloud_sprites.add(cloud)
+        all_sprites.add(cloud)
+
+    player.cloud_list = cloud_sprites
+
     # Add the player to all_sprites group
     all_sprites.add(player)
+
+    # Create all the block sprites and add to block_sprites
+    for i in range(num_blocks):
+        # Create a block(set its parameters)
+        block = Block()
+        # Set a random location for the block inside the screen
+        block.rect.x = random.randrange(SCREEN_WIDTH - block.rect.width)
+        block.rect.y = random.randrange(1000 - block.rect.height)
+
+        # Add the block to the block_sprites Group
+        # Add the block to the all_sprites Group
+        block_sprites.add(block)
+        all_sprites.add(block)
+
 
     # ----------- MAIN LOOP
     while not done:
@@ -164,7 +255,7 @@ def main() -> None:
                     player.right()
                 if event.key == pygame.K_UP:
                     player.up()
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_e:
                     if len(bullet_sprites) < 8:
                         bullet = Bullet(player.rect.midtop)
 
@@ -186,13 +277,47 @@ def main() -> None:
         for bullet in bullet_sprites:
             if bullet.rect.y < 0:
                 bullet.kill()
+            if pygame.sprite.spritecollideany(bullet, cloud_sprites):
+                bullet.kill()
+
+            blocks_hit = pygame.sprite.spritecollide(bullet, block_sprites, True)
+            if blocks_hit:
+                bullet.kill()
+                score += 1
+
+        for block in block_sprites:
+            if pygame.sprite.spritecollideany(block, cloud_sprites):
+                block.kill()
+
+        block_collect = pygame.sprite.spritecollide(player, block_sprites, True)
+        for block in block_collect:
+            score += 1
+
+        print(player.y_vel)
+
+        # if len(block_sprites) < 40:
+        #     for i in range (num_blocks):
+        #         num_blocks + 100
+
+
 
         # ----------- DRAW THE ENVIRONMENT
         #screen.fill(BGCOLOUR)      # fill with bgcolor
         screen.blit(pygame.image.load("./images/blue_mountains.jpg"), (0, 0))
 
-        # for platform in platforms:
-        #     pygame.draw.rect(screen, WHITE, cloud.platform)
+        screen.blit(pygame.transform.scale(pygame.image.load("./images/arrowkeys.png"), (180, 90)), (1050, 300))
+
+        screen.blit(font_medium.render("Shoot or touch the blocks to collect them", True, BLACK), (100, 100))
+        screen.blit(font_medium.render("Jump on the clouds to aim at the blocks better", True, BLACK), (100, 125))
+
+        screen.blit(font_medium.render("Jump underneath a cloud to warp through", True, BLACK), (935, 210))
+        screen.blit(font_medium.render("Stand too long on a cloud and you'll fall through", True, BLACK), (900, 250))
+        screen.blit(font_small.render("Press E to shoot", True, BLACK), (1065, 400))
+
+        screen.blit(font_medium.render("RELAXING (KIND OF) BLOCK COLLECTING GAME", True, WHITE), (10, 10))
+
+        screen.blit(font_medium.render(f"Score: {score}", True, BLACK), (1490, 15))
+
 
         # Draw all sprites
         all_sprites.draw(screen)

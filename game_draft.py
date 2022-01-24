@@ -149,8 +149,10 @@ class Cloud(pygame.sprite.Sprite):
         [150, 20, 550, 300],
         [150, 20, 1100, 1000],
         [150, 20, 1400, 850],
-        # [150, 20, 1, 1],
-
+        [150, 20, 1425, 350],
+        [150, 20, 1250, 175],
+        [150, 20, 1250, 500],
+        [150, 20, 150, 550]
     ]
 
     def __init__(self, width, height):
@@ -182,12 +184,24 @@ class Bullet(pygame.sprite.Sprite):
         # Set the middle of the bullet to be at coords
         self.rect.center = coords
 
-        self.vel_y = 8
+        self.vel_y = 12
         self.cloud_list = pygame.sprite.Group()
 
     def update(self):
         self.rect.y -= self.vel_y
 
+class Ammo_Bar(pygame.sprite.Sprite):
+    """Represents a bar that shows how much ammunition the player has left
+    Attributes:
+        image: visual representation
+        rect: representation of the bar
+    """
+    def __init__(self):
+        """Arguments:"""
+
+        super().__init__()
+
+        self.rect = self.image.get_rect()
 
 def main() -> None:
     """Driver of the Python script"""
@@ -215,6 +229,7 @@ def main() -> None:
     font_small = pygame.font.SysFont("dejavusansmono", 25)
 
     score = 0
+    WINSCORE = 20
 
     # Create cloud block and add to the cloud sprites and all sprites list
     for c in Cloud.platforms:
@@ -256,7 +271,7 @@ def main() -> None:
                 if event.key == pygame.K_UP:
                     player.up()
                 if event.key == pygame.K_e:
-                    if len(bullet_sprites) < 8:
+                    if len(bullet_sprites) < 20:
                         bullet = Bullet(player.rect.midtop)
 
                     bullet_sprites.add(bullet)
@@ -268,6 +283,15 @@ def main() -> None:
                 if event.key == pygame.K_RIGHT and player.x_vel > 0:
                     player.stop()
 
+            # Game win
+            if score == WINSCORE:
+                for cloud in cloud_sprites:
+                    cloud.kill()
+                for block in block_sprites:
+                    block.kill()
+
+
+
 
 
         # ----------- CHANGE ENVIRONMENT
@@ -276,14 +300,23 @@ def main() -> None:
         all_sprites.update()
         for bullet in bullet_sprites:
             if bullet.rect.y < 0:
-                bullet.kill()
+                bullet.rect.y = -10
             if pygame.sprite.spritecollideany(bullet, cloud_sprites):
-                bullet.kill()
+                bullet.rect.y = -10
+
 
             blocks_hit = pygame.sprite.spritecollide(bullet, block_sprites, True)
             if blocks_hit:
-                bullet.kill()
+                bullet.rect.y = -10
                 score += 1
+
+        # Check if player is at the bottom
+        print("playery: ", player.rect.bottom, " bullets: ", len(bullet_sprites))
+        if player.rect.bottom >= SCREEN_HEIGHT:
+            # Empty all the bullets from the clip
+            for bullet in bullet_sprites:
+                if bullet.rect.y < -9:
+                    bullet.kill()
 
         for block in block_sprites:
             if pygame.sprite.spritecollideany(block, cloud_sprites):
@@ -293,11 +326,20 @@ def main() -> None:
         for block in block_collect:
             score += 1
 
-        print(player.y_vel)
+        # print(player.y_vel)
+        ammo = (20 - int(len(bullet_sprites)))
 
-        # if len(block_sprites) < 40:
-        #     for i in range (num_blocks):
-        #         num_blocks + 100
+        print(ammo)
+
+        if len(block_sprites) < 25:
+            if score > WINSCORE:
+            # Create 10 more blocks
+                for i in range(10):
+                    block = Block()
+                    block.rect.x = random.randrange(SCREEN_WIDTH - block.rect.width)
+                    block.rect.y = random.randrange(1000 - block.rect.height)
+                    block_sprites.add(block)
+                    all_sprites.add(block)
 
 
 
@@ -314,9 +356,25 @@ def main() -> None:
         screen.blit(font_medium.render("Stand too long on a cloud and you'll fall through", True, BLACK), (900, 250))
         screen.blit(font_small.render("Press E to shoot", True, BLACK), (1065, 400))
 
+        screen.blit(font_small.render("Collect 100 blocks to win!", True, BLACK), (300, 400))
+
+        screen.blit(font_small.render("Touch bottom to recharge ammo", True, BLACK), (25, 1170))
+
         screen.blit(font_medium.render("RELAXING (KIND OF) BLOCK COLLECTING GAME", True, WHITE), (10, 10))
 
         screen.blit(font_medium.render(f"Score: {score}", True, BLACK), (1490, 15))
+
+        ammo_remaining = (1.8 * ammo) - 1.8
+
+        # pygame.draw.rect(screen, WHITE, [580, 5, 35, 8])
+        # pygame.draw.rect(screen, BLACK, [580, 5, ammo_remaining, 8])
+        print(player.x, player.y)
+        pygame.draw.rect(screen, WHITE, [player.rect.x - 5.2, (player.rect.y - 10.5), 36.5, 7])
+        pygame.draw.rect(screen, BLUE, [player.rect.x - 5, (player.rect.y - 10), ammo_remaining, 5])
+
+
+
+        # screen.blit(font_medium.render(f"Ammo: {ammo}", True, BLACK), (25, 1150))
 
 
         # Draw all sprites

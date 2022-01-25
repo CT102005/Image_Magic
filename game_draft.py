@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 pygame.init()
 
 WHITE = (255, 255, 255)
@@ -230,6 +231,8 @@ def main() -> None:
 
     score = 0
     WINSCORE = 20
+    t_start = pygame.time.get_ticks()
+    time_won = 0
 
     # Create cloud block and add to the cloud sprites and all sprites list
     for c in Cloud.platforms:
@@ -284,13 +287,11 @@ def main() -> None:
                     player.stop()
 
             # Game win
-            if score == WINSCORE:
+            if score >= WINSCORE:
                 for cloud in cloud_sprites:
                     cloud.kill()
                 for block in block_sprites:
                     block.kill()
-
-
 
 
 
@@ -311,13 +312,13 @@ def main() -> None:
                 score += 1
 
         # Check if player is at the bottom
-        print("playery: ", player.rect.bottom, " bullets: ", len(bullet_sprites))
         if player.rect.bottom >= SCREEN_HEIGHT:
             # Empty all the bullets from the clip
             for bullet in bullet_sprites:
                 if bullet.rect.y < -9:
                     bullet.kill()
 
+        # Kill blocks that touch clouds
         for block in block_sprites:
             if pygame.sprite.spritecollideany(block, cloud_sprites):
                 block.kill()
@@ -326,10 +327,9 @@ def main() -> None:
         for block in block_collect:
             score += 1
 
-        # print(player.y_vel)
+
         ammo = (20 - int(len(bullet_sprites)))
 
-        print(ammo)
 
         if len(block_sprites) < 25:
             if score > WINSCORE:
@@ -344,37 +344,61 @@ def main() -> None:
 
 
         # ----------- DRAW THE ENVIRONMENT
-        #screen.fill(BGCOLOUR)      # fill with bgcolor
+
+        # Background
         screen.blit(pygame.image.load("./images/blue_mountains.jpg"), (0, 0))
 
-        screen.blit(pygame.transform.scale(pygame.image.load("./images/arrowkeys.png"), (180, 90)), (1050, 300))
+        if score < WINSCORE:
 
-        screen.blit(font_medium.render("Shoot or touch the blocks to collect them", True, BLACK), (100, 100))
-        screen.blit(font_medium.render("Jump on the clouds to aim at the blocks better", True, BLACK), (100, 125))
+            # Instructions
+            screen.blit(pygame.transform.scale(pygame.image.load("./images/arrowkeys.png"), (180, 90)), (1050, 300))
+            screen.blit(font_medium.render("Shoot or touch the blocks to collect them", True, BLACK), (100, 100))
+            screen.blit(font_medium.render("Jump on the clouds to aim at the blocks better", True, BLACK), (100, 125))
+            screen.blit(font_medium.render("Jump underneath a cloud to warp through", True, BLACK), (935, 210))
+            screen.blit(font_medium.render("Stand too long on a cloud and you'll fall through", True, BLACK), (900, 250))
+            screen.blit(font_small.render("Press E to shoot", True, BLACK), (1065, 400))
+            screen.blit(font_small.render("Collect 100 blocks to win!", True, BLACK), (300, 400))
+            screen.blit(font_small.render("Touch bottom to recharge ammo", True, BLACK), (25, 1170))
 
-        screen.blit(font_medium.render("Jump underneath a cloud to warp through", True, BLACK), (935, 210))
-        screen.blit(font_medium.render("Stand too long on a cloud and you'll fall through", True, BLACK), (900, 250))
-        screen.blit(font_small.render("Press E to shoot", True, BLACK), (1065, 400))
+        if score >= WINSCORE:
+            screen.blit(font_medium.render("YOU WIN!", True, BLACK), (800, 600))
+            # If time_won is zero, set time to time_now
+            if time_won == 0:
+                time_won = time_now
+                # Update the high score if the current score is the highest
+                with open("./data/gamedraft_highscore.txt") as f:
+                    high_scoretime = float(f.readline().strip())
+                    print(high_scoretime)
 
-        screen.blit(font_small.render("Collect 100 blocks to win!", True, BLACK), (300, 400))
+                with open("./data/gamedraft_highscore.txt", "w") as f:
 
-        screen.blit(font_small.render("Touch bottom to recharge ammo", True, BLACK), (25, 1170))
+                    if time_won < high_scoretime:
+                        f.write(str(time_won))
+                    else:
+                        f.write(str(high_scoretime))
+            # Print out time_won
+            screen.blit(font_small.render(f"Time taken: {time_won} seconds", True, BLACK), (800, 630))
+            screen.blit(font_small.render(f"High score: {high_scoretime} seconds", True, BLACK), (800, 660))
 
+
+
+        # Title
         screen.blit(font_medium.render("RELAXING (KIND OF) BLOCK COLLECTING GAME", True, WHITE), (10, 10))
 
+        # Score
         screen.blit(font_medium.render(f"Score: {score}", True, BLACK), (1490, 15))
 
+        # Ammo Bar
         ammo_remaining = (1.8 * ammo) - 1.8
 
-        # pygame.draw.rect(screen, WHITE, [580, 5, 35, 8])
-        # pygame.draw.rect(screen, BLACK, [580, 5, ammo_remaining, 8])
-        print(player.x, player.y)
         pygame.draw.rect(screen, WHITE, [player.rect.x - 5.2, (player.rect.y - 10.5), 36.5, 7])
         pygame.draw.rect(screen, BLUE, [player.rect.x - 5, (player.rect.y - 10), ammo_remaining, 5])
 
+        # Stopwatch
+        time_now = round(((pygame.time.get_ticks() - t_start) / 1000), 1)
+        if score <= WINSCORE:
+            screen.blit(font_small.render(f"Time: {time_now}", True, BLACK), (1490, 35))
 
-
-        # screen.blit(font_medium.render(f"Ammo: {ammo}", True, BLACK), (25, 1150))
 
 
         # Draw all sprites
@@ -385,6 +409,7 @@ def main() -> None:
 
         # ----------- CLOCK TICK
         clock.tick(75)
+
 
 
 if __name__ == "__main__":

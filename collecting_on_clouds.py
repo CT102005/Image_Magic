@@ -1,20 +1,20 @@
 import pygame
 import random
-import time
 pygame.init()
 
 WHITE = (255, 255, 255)
-BLACK = (  0,   0,   0)
-RED   = (255,   0,   0)
-GREEN = (  0, 255,   0)
-BLUE  = (  0,   0, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 BGCOLOUR = (175, 140, 155)
 SHADOW_BLUE = (110, 130, 160)
 
-SCREEN_WIDTH  = 1600
+SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 1200
-SCREEN_SIZE   = (SCREEN_WIDTH, SCREEN_HEIGHT)
-WINDOW_TITLE  = "Game Draft"
+SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
+WINDOW_TITLE = "Game Draft"
+
 
 class Player(pygame.sprite.Sprite):
     """Describes a player object
@@ -36,10 +36,7 @@ class Player(pygame.sprite.Sprite):
         self.bg = pygame.image.load("./images/dvdimagebackground.png")
         self.rect = self.image.get_rect()
         self.rect.bottom = SCREEN_HEIGHT
-        self.rect.x, self.rect.y = (
-            (SCREEN_WIDTH)/2,
-            (SCREEN_HEIGHT)
-        )
+        self.rect.x, self.rect.y = (SCREEN_WIDTH/2, SCREEN_HEIGHT)
         self.x_vel = 0
         self.y_vel = 0
         self.grav = 0.4
@@ -54,10 +51,13 @@ class Player(pygame.sprite.Sprite):
 
     def left(self):
         self.x_vel = -7
+
     def right(self):
         self.x_vel = 7
+
     def stop(self):
         self.x_vel = 0
+
     def up(self):
         # Check if we're on a platform
         self.rect.bottom += 2
@@ -66,7 +66,6 @@ class Player(pygame.sprite.Sprite):
 
         if self.rect.bottom == SCREEN_HEIGHT or cloud_underneath:
             self.y_vel = -12
-
 
     def update(self) -> None:
         """Calculate movement"""
@@ -100,6 +99,7 @@ class Player(pygame.sprite.Sprite):
             elif self.y_vel < 0:
                 self.rect.top = cloud.rect.bottom
 
+
 class Block(pygame.sprite.Sprite):
     """Describes a block object
     A subclass of pygame.sprite.Sprite
@@ -113,7 +113,6 @@ class Block(pygame.sprite.Sprite):
     def __init__(self) -> None:
         """
         Arguments:
-
         """
         # Call the superclass constructor
         super().__init__()
@@ -125,6 +124,7 @@ class Block(pygame.sprite.Sprite):
 
         # Based on the image, create a Rect for the block
         self.rect = self.image.get_rect()
+
 
 class Cloud(pygame.sprite.Sprite):
     """Describes a platform
@@ -164,6 +164,7 @@ class Cloud(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (150, 20))
         self.rect = self.image.get_rect()
 
+
 class Bullet(pygame.sprite.Sprite):
     """Bullet
     Attributes:
@@ -185,16 +186,16 @@ class Bullet(pygame.sprite.Sprite):
         # Set the middle of the bullet to be at coords
         self.rect.center = coords
 
-        self.vel_y = 12
+        self.vel_y = 15
         self.cloud_list = pygame.sprite.Group()
 
     def update(self):
         self.rect.y -= self.vel_y
 
-class Ammo_Bar(pygame.sprite.Sprite):
+
+class AmmoBar(pygame.sprite.Sprite):
     """Represents a bar that shows how much ammunition the player has left
     Attributes:
-        image: visual representation
         rect: representation of the bar
     """
     def __init__(self):
@@ -203,6 +204,20 @@ class Ammo_Bar(pygame.sprite.Sprite):
         super().__init__()
 
         self.rect = self.image.get_rect()
+
+
+class Quit_Button(pygame.sprite.Sprite):
+    def __init__(self, pos) -> None:
+        """Create a quit button
+
+        Args:
+            pos - (x, y)
+        """
+        super().__init__()
+        self.image = pygame.image.load("./images/closebutton.jpg")
+        self.image = pygame.transform.scale(self.image, (120, 45))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = pos
 
 def main() -> None:
     """Driver of the Python script"""
@@ -213,7 +228,7 @@ def main() -> None:
     # Create some local variables that describe the environment
     done = False
     clock = pygame.time.Clock()
-    num_blocks = 50
+    num_blocks = 75
 
     # Create groups to hold sprites
     all_sprites = pygame.sprite.Group()
@@ -221,16 +236,17 @@ def main() -> None:
     cloud_sprites = pygame.sprite.Group()
     block_sprites = pygame.sprite.Group()
 
-
     # Create player block
     player = Player()
 
     # Font
+    font_large = pygame.font.SysFont("dejavusansmono", 40)
     font_medium = pygame.font.SysFont("dejavusansmono", 30)
     font_small = pygame.font.SysFont("dejavusansmono", 25)
 
+    # Variables
     score = 0
-    WINSCORE = 20
+    winscore = 50
     t_start = pygame.time.get_ticks()
     time_won = 0
 
@@ -259,10 +275,11 @@ def main() -> None:
         block_sprites.add(block)
         all_sprites.add(block)
 
-
     # ----------- MAIN LOOP
     while not done:
         # ----------- EVENT LISTENER
+
+        # Moving left and right
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
@@ -271,8 +288,10 @@ def main() -> None:
                     player.left()
                 if event.key == pygame.K_RIGHT:
                     player.right()
+                # Jumping
                 if event.key == pygame.K_UP:
                     player.up()
+                # Shooting
                 if event.key == pygame.K_e:
                     if len(bullet_sprites) < 20:
                         bullet = Bullet(player.rect.midtop)
@@ -280,6 +299,7 @@ def main() -> None:
                     bullet_sprites.add(bullet)
                     all_sprites.add(bullet)
 
+            # Stop when the keys are lifted
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT and player.x_vel < 0:
                     player.stop()
@@ -287,13 +307,11 @@ def main() -> None:
                     player.stop()
 
             # Game win
-            if score >= WINSCORE:
+            if score >= winscore:
                 for cloud in cloud_sprites:
                     cloud.kill()
                 for block in block_sprites:
                     block.kill()
-
-
 
         # ----------- CHANGE ENVIRONMENT
 
@@ -304,7 +322,6 @@ def main() -> None:
                 bullet.rect.y = -10
             if pygame.sprite.spritecollideany(bullet, cloud_sprites):
                 bullet.rect.y = -10
-
 
             blocks_hit = pygame.sprite.spritecollide(bullet, block_sprites, True)
             if blocks_hit:
@@ -323,17 +340,16 @@ def main() -> None:
             if pygame.sprite.spritecollideany(block, cloud_sprites):
                 block.kill()
 
+        # Kill blocks that touches the player
         block_collect = pygame.sprite.spritecollide(player, block_sprites, True)
         for block in block_collect:
             score += 1
 
-
         ammo = (20 - int(len(bullet_sprites)))
 
-
-        if len(block_sprites) < 25:
-            if score > WINSCORE:
-            # Create 10 more blocks
+        if len(block_sprites) <= 50:
+            if score < winscore:
+                # Create 10 more blocks when there's only 40 on screen
                 for i in range(10):
                     block = Block()
                     block.rect.x = random.randrange(SCREEN_WIDTH - block.rect.width)
@@ -341,52 +357,63 @@ def main() -> None:
                     block_sprites.add(block)
                     all_sprites.add(block)
 
-
-
         # ----------- DRAW THE ENVIRONMENT
 
-        # Background
+        # Background image
         screen.blit(pygame.image.load("./images/blue_mountains.jpg"), (0, 0))
 
-        if score < WINSCORE:
+        if score < winscore:
 
             # Instructions
             screen.blit(pygame.transform.scale(pygame.image.load("./images/arrowkeys.png"), (180, 90)), (1050, 300))
             screen.blit(font_medium.render("Shoot or touch the blocks to collect them", True, BLACK), (100, 100))
             screen.blit(font_medium.render("Jump on the clouds to aim at the blocks better", True, BLACK), (100, 125))
             screen.blit(font_medium.render("Jump underneath a cloud to warp through", True, BLACK), (935, 210))
-            screen.blit(font_medium.render("Stand too long on a cloud and you'll fall through", True, BLACK), (900, 250))
+            screen.blit(font_medium.render("Stay too long on a cloud and you'll fall through", True, BLACK), (900, 250))
             screen.blit(font_small.render("Press E to shoot", True, BLACK), (1065, 400))
-            screen.blit(font_small.render("Collect 100 blocks to win!", True, BLACK), (300, 400))
-            screen.blit(font_small.render("Touch bottom to recharge ammo", True, BLACK), (25, 1170))
+            screen.blit(font_small.render(f"Collect {winscore} blocks to win!", True, BLACK), (300, 400))
+            screen.blit(font_small.render("Touch bottom to recharge ammo", True, WHITE), (25, 1170))
 
-        if score >= WINSCORE:
-            screen.blit(font_medium.render("YOU WIN!", True, BLACK), (800, 600))
+        if score >= winscore:
             # If time_won is zero, set time to time_now
             if time_won == 0:
                 time_won = time_now
                 # Update the high score if the current score is the highest
-                with open("./data/gamedraft_highscore.txt") as f:
+                with open("./data/collecting_on_clouds_highscore.txt") as f:
                     high_scoretime = float(f.readline().strip())
                     print(high_scoretime)
 
-                with open("./data/gamedraft_highscore.txt", "w") as f:
+                with open("./data/collecting_on_clouds_highscore.txt", "w") as f:
 
                     if time_won < high_scoretime:
                         f.write(str(time_won))
                     else:
                         f.write(str(high_scoretime))
-            # Print out time_won
-            screen.blit(font_small.render(f"Time taken: {time_won} seconds", True, BLACK), (800, 630))
-            screen.blit(font_small.render(f"High score: {high_scoretime} seconds", True, BLACK), (800, 660))
 
+                button = Quit_Button((SCREEN_WIDTH - 130, 10))
+                all_sprites.add(button)
+
+            # Print out time_won
+            screen.blit(font_medium.render("YOU WIN!", True, BLACK), (800, 300))
+            screen.blit(font_small.render(f"Time taken: {time_won} seconds", True, BLACK), (750, 330))
+            screen.blit(font_small.render(f"High score: {high_scoretime} seconds", True, BLACK), (750, 360))
+            screen.blit(pygame.transform.scale(pygame.image.load("./images/cake.png"), (420, 420)), (630, 380))
+            screen.blit(font_small.render("Thanks for playing!", True, BLACK), (760, 800))
+            screen.blit(font_small.render("Created by Candice Tsai", True, BLACK), (745, 830))
+
+            # If user clicks in area, set done = True
+            mouse_pos = pygame.mouse.get_pos()
+            if pygame.mouse.get_pressed(3)[0]:
+                if (button.rect.left < mouse_pos[0] < button.rect.right) and (button.rect.top < mouse_pos[1] < button.rect.bottom):
+                    done = True
 
 
         # Title
-        screen.blit(font_medium.render("RELAXING (KIND OF) BLOCK COLLECTING GAME", True, WHITE), (10, 10))
+        screen.blit(font_large.render("RELAXING (KIND OF) BLOCK COLLECTING GAME", True, WHITE), (10, 10))
 
         # Score
-        screen.blit(font_medium.render(f"Score: {score}", True, BLACK), (1490, 15))
+        if score < winscore:
+            screen.blit(font_medium.render(f"Score: {score}", True, BLACK), (1490, 15))
 
         # Ammo Bar
         ammo_remaining = (1.8 * ammo) - 1.8
@@ -396,10 +423,8 @@ def main() -> None:
 
         # Stopwatch
         time_now = round(((pygame.time.get_ticks() - t_start) / 1000), 1)
-        if score <= WINSCORE:
+        if score < winscore:
             screen.blit(font_small.render(f"Time: {time_now}", True, BLACK), (1490, 35))
-
-
 
         # Draw all sprites
         all_sprites.draw(screen)
@@ -409,7 +434,6 @@ def main() -> None:
 
         # ----------- CLOCK TICK
         clock.tick(75)
-
 
 
 if __name__ == "__main__":
